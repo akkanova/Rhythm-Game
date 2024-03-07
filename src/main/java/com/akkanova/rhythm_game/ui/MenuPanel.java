@@ -1,30 +1,28 @@
 package com.akkanova.rhythm_game.ui;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class MenuPanel extends JPanel {
-    /** It's key representation in its parent window CardLayout */
-    public static final String CARD_KEY = "menu-panel";
-    private GameWindow parent;
-
+public class MenuPanel extends BasePanel {
     public MenuPanel() {
-        super(true); // Enable double-buffered
+        super();
         this.setFocusable(true);
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                super.keyPressed(e);
+                System.out.println(e.getKeyChar());
             }
         });
-
-        this.repaint();
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void render(Graphics2D graphics2D) {
+        drawFPS(graphics2D);
+    }
 
+    @Override
+    public boolean shouldRender(long deltaMS) {
+        return true;
     }
 }

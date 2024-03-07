@@ -5,34 +5,38 @@ import java.awt.*;
 
 public class GameWindow extends JFrame {
     public final MenuPanel menuPanel;
-    public final JPanel cards;
+    public BasePanel currentPanel;
 
     public GameWindow(int width, int height) {
         super("The Rhythm Game");
-        this.setVisible(true);
-        this.setResizable(false);
-        this.setLocationRelativeTo(null); // Center of the screen
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        Insets insets = getInsets();
-        this.setSize(
-            insets.left   + width  + insets.right,
-            insets.bottom + height + insets.top
-        );
-
         this.menuPanel = new MenuPanel();
-        this.menuPanel.grabFocus();
+        this.menuPanel.setBounds(0, 0, width, height);
 
         // Use CardLayout to allow switching between
         // different panels.
-        this.cards = new JPanel(new CardLayout());
-        this.cards.add(menuPanel, MenuPanel.CARD_KEY);
-        this.getContentPane().add(cards);
+        JPanel pane = (JPanel) this.getContentPane();
+        pane.setPreferredSize(new Dimension(width, height));
+        pane.setLayout(new CardLayout());
+        pane.add(this.menuPanel, this.menuPanel.getName());
+
+        this.setCurrentVisiblePanel(this.menuPanel);
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null); // Center of the screen
+        this.setResizable(false);
+        this.setVisible(true);
+        this.pack();
     }
 
-    public void setCurrentVisibleCard(String cardKey) {
-        CardLayout layout = (CardLayout) this.cards.getLayout();
-        layout.show(this.cards, cardKey);
+    public void setCurrentVisiblePanel(BasePanel panel) {
+        if (currentPanel != null)
+            currentPanel.renderer.stop();
+
+        CardLayout layout = (CardLayout) this.getContentPane().getLayout();
+        layout.show(this.getContentPane(), panel.getName());
+        panel.requestFocus();
+
+        this.currentPanel = panel;
+        this.currentPanel.renderer.start();
     }
 
     /** Defaults to 480 x 480 */
