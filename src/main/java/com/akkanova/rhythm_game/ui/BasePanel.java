@@ -1,14 +1,16 @@
 package com.akkanova.rhythm_game.ui;
 
+import com.akkanova.rhythm_game.common.GlobalConfig;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.util.Objects;
 
 public abstract class BasePanel extends Canvas {
     protected static final Color DEFAULT_BACKGROUND_COLOR = new Color(54, 57, 63);
     protected static final Color DEFAULT_FOREGROUND_COLOR = new Color(187, 187, 187);
     protected long lastRender;
-    protected int fps;
 
     /** Specific timer to maintain target TPS */
     public final Timer renderer;
@@ -27,23 +29,27 @@ public abstract class BasePanel extends Canvas {
                     ? currentTime - this.lastRender
                     : 0;
 
-                if (this.shouldRender(delta)) {
-                    BufferStrategy strategy = getBufferStrategy();
-                    if (strategy == null) {
-                        createBufferStrategy(2);
-                        strategy = getBufferStrategy();
-                    }
-
-                    Graphics2D graphics2D = (Graphics2D) strategy.getDrawGraphics();
-                    graphics2D.setColor(DEFAULT_BACKGROUND_COLOR);
-                    graphics2D.fillRect(0, 0, getBounds().width, getBounds().height);
-                    graphics2D.setColor(DEFAULT_FOREGROUND_COLOR);
-
-                    this.render(graphics2D);
-
-                    graphics2D.dispose();
-                    strategy.show();
+                BufferStrategy strategy = getBufferStrategy();
+                if (strategy == null) {
+                    createBufferStrategy(2);
+                    strategy = Objects.requireNonNull(getBufferStrategy());
                 }
+
+                Graphics2D graphics2D = (Graphics2D) strategy.getDrawGraphics();
+                graphics2D.setColor(DEFAULT_BACKGROUND_COLOR);
+                graphics2D.fillRect(0, 0, getBounds().width, getBounds().height);
+                graphics2D.setColor(DEFAULT_FOREGROUND_COLOR);
+
+                if (GlobalConfig.getInstance().shouldShowFPS()) {
+                    String string = String.format("%.1f FPS", 1000 / (double) delta);
+                    graphics2D.drawString(string, 2, graphics2D.getFontMetrics().getHeight());
+                }
+
+                this.render(graphics2D, delta);
+
+                graphics2D.dispose();
+                strategy.show();
+                Toolkit.getDefaultToolkit().sync();
 
                 this.lastRender = System.currentTimeMillis();
             }
@@ -52,18 +58,9 @@ public abstract class BasePanel extends Canvas {
         this.renderer.setRepeats(true);
     }
 
-
-    /** @return whether the loop should call draw */
-    protected abstract boolean shouldRender(long deltaMS); // Logic
-    protected abstract void render(Graphics2D graphics2D); // Graphics
+    protected abstract void render(Graphics2D graphics2D, long deltaMS); // Graphics
 
     //-----------------------------------------------------------------------------------
-    // Graphics Method
+    // Graphics Helper Methods
     //-----------------------------------------------------------------------------------
-
-    protected void drawFPS(Graphics2D graphics2D) {
-        double fps = 1000 / (double) (System.currentTimeMillis() - lastRender);
-        String string = String.format("%.1f FPS", fps);
-        graphics2D.drawString(string, 2, graphics2D.getFontMetrics().getHeight());
-    }
 }

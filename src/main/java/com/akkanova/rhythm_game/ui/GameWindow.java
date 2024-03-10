@@ -1,5 +1,7 @@
 package com.akkanova.rhythm_game.ui;
 
+import com.akkanova.rhythm_game.common.GlobalConfig;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -39,9 +41,11 @@ public class GameWindow extends JFrame {
         this.currentPanel.renderer.start();
     }
 
-    /** Defaults to 480 x 480 */
+    /** Defaults to 640 x 360 (16:9) */
     public GameWindow() {
-        // TODO UI Scaling
-        this(480, 480);
+        this(
+            GlobalConfig.getInstance().getWindowWidth(),
+            GlobalConfig.getInstance().getWindowHeight()
+        );
     }
 }
